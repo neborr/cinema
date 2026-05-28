@@ -20,7 +20,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Метод для безопасного хэширования паролей в БД
+        return new BCryptPasswordEncoder();
     }
 
     @Bean
@@ -32,12 +32,10 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/movies/**", "/api/sessions/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-                        // Админка доступна только админам
-                        .requestMatchers("/api/admin/**").permitAll()
-                        // Все остальные запросы требуют аутентификации
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/bookings/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
-                // Добавляем наш JWT фильтр перед стандартным
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

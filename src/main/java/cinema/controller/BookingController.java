@@ -6,7 +6,6 @@ import cinema.service.BookingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,10 +20,8 @@ public class BookingController {
     @PostMapping
     public ResponseEntity<?> bookTicket(
             @RequestBody BookingRequest request,
-            @AuthenticationPrincipal UserDetails userDetails) {
+            @AuthenticationPrincipal String username) {
         try {
-            // Берем имя пользователя из контекста безопасности
-            String username = userDetails.getUsername();
             Booking booking = bookingService.createBooking(request, username);
             return ResponseEntity.ok(booking);
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -35,7 +32,7 @@ public class BookingController {
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<Booking>> getMyBookings(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(bookingService.getUserBookings(userDetails.getUsername()));
+    public ResponseEntity<List<Booking>> getMyBookings(@AuthenticationPrincipal String username) {
+        return ResponseEntity.ok(bookingService.getUserBookings(username));
     }
 }

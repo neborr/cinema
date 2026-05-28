@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -39,20 +40,25 @@ public class TokenFilter extends OncePerRequestFilter {
                 String username = jwtCore.getNameFromToken(jwt);
 
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                    // Создаем объект аутентификации для Spring Security
+                    // Используем твой новый метод из JwtCore вместо ручного парсинга
+                    String roleName = jwtCore.getRoleFromToken(jwt);
+
+                    // Spring Security ожидает роли с префиксом "ROLE_"
+                    SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + roleName);
+
+                    // Создаем объект аутентификации для Spring Security с реальной ролью
                     UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                            username,
+                            username, // Передаем строку username в качестве Principal
                             null,
-                            Collections.emptyList() // Здесь можно указать роли/права доступа, если они есть в токене
+                            Collections.singletonList(authority)
                     );
 
-                    // Передаем пользователя в контекст Spring - теперь он авторизован
+                    // Передаем пользователя в контекст Spring - теперь он полностью авторизован
                     SecurityContextHolder.getContext().setAuthentication(auth);
-                    log.info("Пользователь {} успешно авторизован по JWT", username);
+                    log.info("Пользователь {} с правами ROLE_{} успешно авторизован по JWT", username, roleName);
                 }
             }
         } catch (Exception e) {
-            // Если токен невалидный, упал по таймауту или поврежден - пишем в консоль причину
             log.error("Ошибка аутентификации по JWT токену: {}", e.getMessage());
         }
 

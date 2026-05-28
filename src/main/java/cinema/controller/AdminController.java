@@ -1,11 +1,14 @@
 package cinema.controller;
 
+import cinema.dto.CinemaHallDTO;
 import cinema.dto.MovieDTO;
 import cinema.dto.SessionDTO;
 import cinema.entity.Booking;
+import cinema.entity.CinemaHall;
 import cinema.entity.Movie;
 import cinema.entity.Session;
 import cinema.service.BookingService;
+import cinema.service.CinemaHallService;
 import cinema.service.MovieService;
 import cinema.service.SessionService;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +22,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminController {
 
+    private final CinemaHallService cinemaHallService;
     private final MovieService movieService;
     private final SessionService sessionService;
     private final BookingService bookingService;
+
+    @PostMapping("/halls")
+    public ResponseEntity<CinemaHall> addHall(@RequestBody CinemaHallDTO cinemaHallDTO) {
+        return ResponseEntity.ok(cinemaHallService.createHallWithSeats(cinemaHallDTO));
+    }
 
     @PostMapping("/movies")
     public ResponseEntity<Movie> addMovie(@RequestBody MovieDTO movieDTO) {

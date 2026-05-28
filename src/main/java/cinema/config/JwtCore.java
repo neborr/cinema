@@ -11,11 +11,11 @@ import java.util.Date;
 
 @Component
 public class JwtCore {
-    // Секретный ключ для подписи токенов
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     // Токен будет жить 1 день (в миллисекундах)
     private final int lifetime = 86400000;
 
+    // Метод для генерации токена с зашитой ролью
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
@@ -35,6 +35,16 @@ public class JwtCore {
                 .getSubject();
     }
 
+    public String getRoleFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
+    }
+
+    // Валидация токена
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
